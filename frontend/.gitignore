@@ -1,0 +1,14 @@
+node_modules
+dist
+dist-ssr
+.output
+.vinxi
+.nitro
+.tanstack
+.wrangler
+.dev.vars
+*.local
+*.log
+.env
+.env.*
+!.env.example
