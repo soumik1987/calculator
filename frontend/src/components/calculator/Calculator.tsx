@@ -75,7 +75,7 @@ export function Calculator() {
     <main className="flex min-h-svh items-center justify-center bg-background px-5 py-8 text-foreground">
       <section aria-labelledby="calculator-title" className="w-full max-w-sm">
         <h1 id="calculator-title" className="mb-5 text-center text-xl font-semibold">
-          Sami Calculator
+          Calculator
         </h1>
         <Display
           expression={state.expression}

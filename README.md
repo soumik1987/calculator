@@ -1,8 +1,10 @@
-# Sami Calculator
+# Calculator
 
 A calculator that works like the one on a phone. The web page has a display and a keypad.
 When you press `=`, the expression goes to a Go service, which works it out and sends back
 the result or an error.
+
+The UI was built with the help of Lovable
 
 ## Features
 
@@ -61,6 +63,8 @@ browser ──► Caddy ──┬── /api/* ──► backend   Go service, d
 - [backend/](backend/): the Go service and its API
 - [frontend/](frontend/): the React app
 - [deploy/](deploy/): Docker Compose and Caddy
+- [spec/](spec/README.md): requirements, design and tasks. Change the spec first, then the code
+- [docs/](docs/): the prompts used to build the repo and the UI
 
 ## Design decisions
 
@@ -75,6 +79,13 @@ browser ──► Caddy ──┬── /api/* ──► backend   Go service, d
 - **Distroless backend image, no Docker health checks.** No shell in the image, and nothing
   polling. Cost: Caddy may return 502 for a moment at startup.
 
+## Assumptions
+
+- One user at a time on a trusted network: no login and no rate limiting.
+- Phone-calculator precision is enough, so `float64` is used rather than exact decimals.
+- Messages are in English.
+- A current browser (ES2022, `fetch`).
+
 ## Future improvements
 
 - **Container health checks**, if startup order or health in `docker ps` matters. Distroless
@@ -84,14 +95,39 @@ browser ──► Caddy ──┬── /api/* ──► backend   Go service, d
   and a key each.
 - **Exact decimals** with `math/big`, if `0.1 + 0.2` must equal 0.3.
 
-## Run locally
+## Setup and run
 
-You need Go 1.26+ and Node 20.19+. In two terminals:
+You need Go 1.26+ and Node 20.19+. Run the backend and the frontend in two terminals:
 
 ```sh
-cd backend && cp .env.example .env && make run
+cd backend && cp .env.example .env && make run      # API on http://localhost:8081
 cd frontend && cp .env.example .env && npx bun install && npm run dev
 ```
 
-Open http://localhost:8082.
+Open http://localhost:8080. The dev server forwards `/api` to the backend.
 
+To run everything with Docker instead, see [deploy/](deploy/README.md): `cd deploy && cp
+.env.example .env && docker compose up -d --build`, then open http://localhost.
+
+Tests: `cd backend && make check`, and `cd frontend && npm test`.
+
+## API examples
+
+```sh
+curl -s localhost:8081/api/v1/calculations \
+  -H 'Content-Type: application/json' \
+  -d '{"expression": "(986×(4+8))+√16"}'
+# 200 {"expression":"(986×(4+8))+√16","result":11836}
+
+curl -s localhost:8081/api/v1/calculations \
+  -H 'Content-Type: application/json' \
+  -d '{"expression": "sin(30) + log(1000)"}'
+# 200 {"expression":"sin(30) + log(1000)","result":3.5}
+
+curl -s localhost:8081/api/v1/calculations \
+  -H 'Content-Type: application/json' \
+  -d '{"expression": "5/0"}'
+# 422 {"error":{"code":"division_by_zero","message":"Cannot divide by zero."}}
+```
+
+All status codes and error codes are listed in the [backend README](backend/README.md#errors).

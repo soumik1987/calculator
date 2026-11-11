@@ -22,16 +22,9 @@ It listens on http://localhost:8081. Settings:
 
 ## API
 
-```
-POST /api/v1/calculations
-Content-Type: application/json
-
-{"expression": "(986×(4+8))+2"}
-```
-
-```json
-{ "expression": "(986×(4+8))+2", "result": 11834 }
-```
+`POST /api/v1/calculations` with `{"expression": "..."}` returns
+`{"expression": "...", "result": <number>}`. There are `curl` examples in the
+[main README](../README.md#api-examples).
 
 The expression rules are in the [main README](../README.md#calculation-rules). Besides the
 keypad symbols, it also accepts `*`, `/`, `x`, `-` and `sqrt`. The body must be JSON, under
